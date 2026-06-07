@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <!-- Loader -->
+    <div id="loaderContainer" class="loader-container">
+      <div class="loader"></div>
+      <div class="loader-message">Loading your productivity insights...</div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="title-container">
+        <h4>Make Me Productive</h4>
+        <label class="switch">
+          <input type="checkbox" id="toggleFilter" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="subtitle">YouTube Focus Buddy</div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-container">
+      <div class="stat-item">
+        <span class="stat-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          Educational Videos
+        </span>
+        <span id="educationalCount" class="stat-value">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          Filtered Videos
+        </span>
+        <span id="filteredCount" class="stat-value">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          Total Checked
+        </span>
+        <span id="totalVideos" class="stat-value">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Learning Time
+        </span>
+        <span id="educationalTime" class="stat-value">0 min</span>
+      </div>
+    </div>
+
+    <!-- Educational Content Progress -->
+    <div class="progress-container">
+      <div class="progress-label">
+        <span>Educational Content</span>
+        <span id="educationalPercentage">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div id="educationalProgress" class="progress"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Daily Learning Goal -->
+    <div class="goal-container">
+      <div class="goal-header">
+        <span class="goal-title">Daily learning goal</span>
+        <span id="goalValue" class="goal-value">30 min</span>
+      </div>
+      <input type="range" id="goalSlider" class="goal-slider" min="0" max="120" value="30" step="5" />
+      <div id="goalProgressText" class="goal-progress-text">0% of goal</div>
+    </div>
+
+    <!-- Focus Sessions -->
+    <div class="divider"></div>
+
+    <div class="focus-session-card" id="focusSessionCard" data-state="idle">
+      <div class="focus-session-header">
+        <span class="focus-session-title">Focus session</span>
+        <span id="focusSessionStatus" class="focus-session-status">Ready</span>
+      </div>
+
+      <div id="focusSessionTimer" class="focus-session-timer">25 min</div>
+      <div id="focusSessionMeta" class="focus-session-meta">
+        Start a countdown that can auto-enable filtering while you study.
+      </div>
+      <div id="focusSessionSelection" class="focus-session-selection">Selected: 25 min preset</div>
+
+      <div class="focus-session-presets">
+        <button type="button" class="focus-session-preset is-active" data-duration="25">25 min</button>
+        <button type="button" class="focus-session-preset" data-duration="45">45 min</button>
+        <button type="button" class="focus-session-preset" data-duration="60">60 min</button>
+      </div>
+
+      <div id="focusSessionCustom" class="focus-session-custom">
+        <div class="focus-session-custom-header">
+          <span>Custom duration</span>
+          <span id="focusSessionCustomValue">25 min</span>
+        </div>
+        <input
+          type="range"
+          id="focusSessionCustomSlider"
+          class="focus-session-slider"
+          min="5"
+          max="120"
+          step="5"
+          value="25"
+        />
+      </div>
+
+      <div class="focus-session-actions">
+        <button type="button" id="focusSessionStart" class="focus-session-primary">Start 25 min session</button>
+        <button type="button" id="focusSessionCancel" class="focus-session-secondary" hidden>Cancel session</button>
+        <button type="button" id="focusSessionClear" class="focus-session-secondary" hidden>Clear</button>
+      </div>
+    </div>
+
+    <!-- Productivity Score -->
+    <div class="productivity-score">
+      <div class="score-ring-wrapper">
+        <svg viewBox="0 0 140 140">
+          <circle class="score-ring-bg" cx="70" cy="70" r="60"></circle>
+          <circle id="scoreRing" class="score-ring-fg" cx="70" cy="70" r="60"></circle>
+        </svg>
+        <div id="productivityScore" class="score-text">0%</div>
+      </div>
+      <div class="score-label">Productivity Score</div>
+      <div class="score-breakdown">Watch time (60%) | Video ratio (40%)</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- AI Analysis Stats -->
+    <div class="ai-stats">
+      <div class="ai-stat">
+        <span class="ai-stat-label">AI Analyzed</span>
+        <span id="aiClassified" class="ai-stat-value">0</span>
+      </div>
+      <div class="ai-stat">
+        <span class="ai-stat-label">Blocked</span>
+        <span id="aiBlocked" class="ai-stat-value">0</span>
+      </div>
+      <div class="ai-stat">
+        <span class="ai-stat-label">Overridden</span>
+        <span id="aiOverridden" class="ai-stat-value">0</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Data Actions -->
+    <div class="data-actions-container">
+      <button type="button" id="exportDataBtn" class="data-action-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Export CSV
+      </button>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

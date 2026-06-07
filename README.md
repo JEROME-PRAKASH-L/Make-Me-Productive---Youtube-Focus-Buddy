@@ -1,11 +1,12 @@
 # Make Me Productive – YouTube Focus Buddy
 
-**Make Me Productive – YouTube Focus Buddy** is a Chrome extension that helps you stay focused and productive on YouTube by automatically hiding distracting entertainment videos—including Shorts, ads, and breaking news sections—while highlighting educational content. It also tracks your productivity and provides motivational overlays to encourage better viewing habits.
+**Make Me Productive – YouTube Focus Buddy** is a Chrome extension that helps you stay focused and productive on YouTube by automatically hiding distracting entertainment videos—including Shorts, ads, and breaking news sections—while highlighting educational content. It uses **Gemini 2.0 Flash AI** for transcript-based video classification with a local keyword fallback, and tracks your productivity with real-time analytics.
 
 ## Features
 
-- **Smart Content Filtering**:
-  - Detects and hides non-educational content using an extensive keyword database
+- **AI-Powered Content Filtering**:
+  - Classifies videos using Google Gemini 2.0 Flash transcript analysis
+  - Falls back to intelligent keyword scoring when AI is unavailable
   - Filters out entertainment, Shorts, ads, and breaking news sections
   - Preserves educational videos such as tutorials, courses, and lectures
   - Real-time filtering of newly loaded and dynamically added content
@@ -14,6 +15,7 @@
   - Tracks the number of educational vs. non-educational videos shown
   - Measures educational and entertainment watch time
   - Calculates a personalized productivity score based on your viewing habits
+  - Configurable daily learning goal with progress tracking
   - Provides real-time progress and score updates
 
 - **Motivational Overlays**:
@@ -25,10 +27,11 @@
   - Modern popup with productivity statistics and progress bars
   - Easy toggle switch to enable or disable filtering
   - Visual display of educational content percentage and productivity score
+  - AI analysis stats (classified, blocked, overridden)
 
 - **Privacy-Focused**:
-  - All processing happens locally in your browser
-  - No data collection or external services
+  - All keyword classification happens locally in your browser
+  - AI classification uses Gemini API with no user data stored externally
   - Settings sync across your Chrome instances
 
 ## Benefits
@@ -42,9 +45,10 @@
 ## Installation
 
 1. Clone or download this repository to your local machine.
-2. Open Chrome and go to `chrome://extensions/`.
-3. Enable **Developer mode** in the top-right corner.
-4. Click **Load unpacked** and select the folder containing this project.
+2. Optional: add your own Gemini API key in `src/background/config.js` to enable AI transcript classification. Leave it blank to use the local keyword fallback only.
+3. Open Chrome and go to `chrome://extensions/`.
+4. Enable **Developer mode** in the top-right corner.
+5. Click **Load unpacked** and select the folder containing this project.
 
 ## Usage
 
@@ -60,30 +64,62 @@
 
 ## File Structure
 
-- `content.js`: Main logic for filtering YouTube videos, handling overlays, and tracking stats.
-- `popup.html` / `popup.js`: User interface for toggling the filter and viewing productivity stats.
-- `manifest.json`: Chrome extension manifest and permissions.
-- `icon.png`: Extension icon.
+```
+├── manifest.json                   # Chrome extension manifest (MV3)
+├── icons/
+│   └── icon.png                    # Extension icon
+├── src/
+│   ├── content/                    # Content script modules (YouTube page)
+│   │   ├── keywords.js             # Keyword lists, channel lists, messages
+│   │   ├── classifier.js           # Classification logic (matchesKeyword, isEducational, shouldFilterOut)
+│   │   ├── transcript.js           # YouTube transcript fetching
+│   │   ├── ui.js                   # DOM helpers, overlays, indicators
+│   │   ├── stats.js                # Productivity stats & watch time tracking
+│   │   ├── watchPage.js            # Watch page analysis (single video view)
+│   │   ├── browsePage.js           # Browse/search page filtering (video cards)
+│   │   └── lifecycle.js            # Init, navigation detection, observers
+│   ├── background/                 # Background service worker modules
+│   │   ├── index.js                # Entry point (importScripts loader)
+│   │   ├── config.js               # API keys, model settings, constants
+│   │   ├── cache.js                # Classification cache with expiry
+│   │   ├── geminiApi.js            # Gemini 2.0 Flash API classification
+│   │   ├── localClassifier.js      # Weighted keyword scoring fallback
+│   │   └── messageHandler.js       # Message routing & tab communication
+│   └── popup/                      # Extension popup UI
+│       ├── popup.html              # Popup HTML structure
+│       ├── popup.css               # Popup styles
+│       └── popup.js                # Popup logic, stats display, toggle
+├── README.md
+└── LICENSE
+```
 
 ## How It Works
 
-1. **Content Script**:
-   - Scans for video elements, including breaking news and Shorts.
-   - Hides distracting videos and overlays them with motivational messages.
-   - Tracks stats and watch time for educational and entertainment content.
+1. **Content Script** (`src/content/`):
+   - Observes YouTube page changes via MutationObserver + IntersectionObserver
+   - On browse/search pages: scans video cards, classifies titles locally, hides distracting ones
+   - On watch pages: fetches transcript, sends to background for AI classification
+   - Overlays distracting videos with motivational messages
+   - Tracks stats and watch time for educational and entertainment content
 
-2. **Popup**:
-   - Lets you enable or disable the filter.
-   - Displays real-time productivity statistics.
+2. **Background Service Worker** (`src/background/`):
+   - Receives classification requests from content script
+   - Sends transcripts to Gemini 2.0 Flash API for AI analysis
+   - Falls back to weighted keyword scoring if API unavailable
+   - Caches results for 7 days to minimize API calls
+   - Routes messages between content script, popup, and storage
 
-3. **Manifest**:
-   - Defines extension permissions, content scripts, and popup configuration.
+3. **Popup** (`src/popup/`):
+   - Toggle to enable/disable filtering
+   - Real-time productivity dashboard (stats, score ring, goal tracker)
+   - AI analysis stats (classified, blocked, overridden)
 
 ## Customization
 
-- **Distracting Keywords**: Edit the `entertainmentKeywords` array in `content.js`.
-- **Educational Keywords**: Edit the `educationalKeywords` array in `content.js`.
-- **Motivational Messages**: Customize the `distractingKeywordMessages` object in `content.js`.
+- **Distracting Keywords**: Edit `entertainmentKeywords` in `src/content/keywords.js`
+- **Educational Keywords**: Edit `educationalKeywords` in `src/content/keywords.js`
+- **Motivational Messages**: Customize `distractingKeywordMessages` in `src/content/keywords.js`
+- **Known Edu Channels**: Add trusted channels to `knownEducationalChannels` in `src/content/keywords.js`
 
 ### Example keyword sets (recommended starting point)
 - Entertainment keywords: short, prank, meme, trailer, reaction, vlog, funny, gaming, music video, dance, gossip, celebrity, drama, challenge
@@ -116,9 +152,10 @@ Planned improvements and near-term work:
 
 ## Privacy & Security
 
-- All processing happens locally in the browser.
-- No data is sent to external servers.
+- Keyword-based classification runs entirely in the browser.
+- AI classification sends only video transcripts to Google Gemini API — no personal data.
 - Uses Chrome Storage for local settings and stats only.
+- No tracking, no analytics, no third-party services beyond Gemini.
 
 ## Troubleshooting
 
