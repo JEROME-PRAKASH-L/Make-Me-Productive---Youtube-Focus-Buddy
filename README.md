@@ -45,6 +45,19 @@
 2. Open Chrome and go to `chrome://extensions/`.
 3. Enable **Developer mode** in the top-right corner.
 4. Click **Load unpacked** and select the folder containing this project.
+5. Pin the extension from Chrome's extensions menu, then open YouTube.
+
+## Quick verification
+
+After installation, use this short check to confirm the extension is working:
+
+1. Open the extension popup and make sure filtering is enabled.
+2. Visit the YouTube home page and confirm distracting shelves, such as Shorts, are filtered.
+3. Search for a learning topic such as `Python tutorial` and confirm educational results remain visible.
+4. Open the popup again and confirm the counters or productivity score have updated.
+5. Turn filtering off and reload YouTube to confirm the normal page is restored.
+
+If any step fails, use the troubleshooting section below and include the Chrome version plus console error when reporting an issue.
 
 ## Usage
 
@@ -87,7 +100,7 @@
 
 ### Example keyword sets (recommended starting point)
 - Entertainment keywords: short, prank, meme, trailer, reaction, vlog, funny, gaming, music video, dance, gossip, celebrity, drama, challenge
-- Educational keywords: tutorial, how to, lecture, course, lesson, explain, guide, walkthrough, lecture, study, tutorial, documentary, science, programming, math, history
+- Educational keywords: tutorial, how to, lecture, course, lesson, explain, guide, walkthrough, study, documentary, science, programming, coding, math, history
 
 ## Permissions
 
@@ -130,8 +143,15 @@ Planned improvements and near-term work:
 
 ## Contributing
 
-- Contributions welcome. Please open issues or PRs.
-- Keep changes focused, update any relevant keywords and tests (if added).
+Contributions are welcome. A useful contribution should be easy to understand and verify:
+
+1. Open an issue describing the problem or improvement.
+2. Create a focused branch and keep unrelated changes out of the pull request.
+3. Explain the expected YouTube behavior before and after the change.
+4. Run the quick-verification checklist above and report the result in the pull request.
+5. Update relevant keyword examples or tests when behavior changes.
+
+Bug reports are most helpful when they include the Chrome version, page URL, reproduction steps, and any console error.
 
 ## License
 
