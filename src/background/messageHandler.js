@@ -2,6 +2,50 @@
 // Message Handler — routes all chrome.runtime messages
 // ═══════════════════════════════════════════════════════════════════════════════
 
+let aiStatsUpdateQueue = Promise.resolve();
+
+function getGeminiApiKey() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get([GEMINI_API_KEY_STORAGE_KEY], (result) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
+      }
+
+      resolve((result[GEMINI_API_KEY_STORAGE_KEY] || '').trim());
+    });
+  });
+}
+
+function updateAiStats(mutator) {
+  const runUpdate = () => new Promise((resolve, reject) => {
+    chrome.storage.local.get(['aiStats'], (result) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
+      }
+
+      const current = result.aiStats || { aiClassified: 0, blocked: 0, overridden: 0 };
+      const next = mutator({ ...current });
+
+      chrome.storage.local.set({ aiStats: next }, () => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+          return;
+        }
+
+        resolve(next);
+      });
+    });
+  });
+
+  const pending = aiStatsUpdateQueue.then(runUpdate, runUpdate);
+  aiStatsUpdateQueue = pending.catch((error) => {
+    console.warn('MMP: Failed to update AI stats:', error);
+  });
+  return pending;
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   // ─── Full video classification (transcript + AI) ──────────────────────────
@@ -17,24 +61,35 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     (async () => {
       try {
+        const apiKey = await getGeminiApiKey();
         let classResult;
-        try {
-          classResult = await classifyWithGemini(GEMINI_API_KEY, transcript, videoTitle, channelName);
-        } catch (apiError) {
-          console.warn('Gemini API failed, falling back to local:', apiError.message);
+        let classifiedByAi = false;
+
+        if (!apiKey) {
           classResult = classifyLocally(transcript, videoTitle, channelName);
-          classResult.reason = `AI unavailable (${apiError.message}). ${classResult.reason}`;
+          classResult.reason = `Gemini API key not configured. ${classResult.reason}`;
+        } else {
+          try {
+            classResult = await classifyWithGemini(apiKey, transcript, videoTitle, channelName);
+            classifiedByAi = true;
+          } catch (apiError) {
+            console.warn('Gemini API failed, falling back to local:', apiError.message);
+            classResult = classifyLocally(transcript, videoTitle, channelName);
+            classResult.reason = `AI unavailable (${apiError.message}). ${classResult.reason}`;
+          }
         }
 
         cacheResult(videoId, classResult);
 
-        // Update AI stats
-        chrome.storage.local.get(['aiStats'], (statsResult) => {
-          const aiStats = statsResult.aiStats || { aiClassified: 0, blocked: 0, overridden: 0 };
-          aiStats.aiClassified++;
-          if (!classResult.isEducational) aiStats.blocked++;
-          chrome.storage.local.set({ aiStats });
-        });
+        if (classifiedByAi) {
+          await updateAiStats((aiStats) => {
+            aiStats.aiClassified++;
+            if (!classResult.isEducational) aiStats.blocked++;
+            return aiStats;
+          }).catch((error) => {
+            console.warn('MMP: Classification succeeded but stats update failed:', error);
+          });
+        }
 
         sendResponse({ success: true, result: classResult, cached: false });
       } catch (error) {
@@ -59,6 +114,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     (async () => {
       try {
+        const apiKey = await getGeminiApiKey();
+        if (!apiKey) {
+          const localResult = classifyLocally('', videoTitle, channelName);
+          localResult.reason = `Gemini API key not configured. ${localResult.reason}`;
+          cacheResult(cacheKey, localResult);
+          sendResponse({ success: true, result: localResult, cached: false });
+          return;
+        }
+
         const now = Date.now();
         const timeSinceLast = now - lastApiCall;
         if (timeSinceLast < API_COOLDOWN_MS) {
@@ -76,7 +140,7 @@ Channel: "${channelName}"
 
 Respond ONLY with valid JSON: {"classification": "EDUCATIONAL" or "NOT_EDUCATIONAL", "confidence": 0.0-1.0, "reason": "brief reason"}`;
 
-        const url = `${GEMINI_BASE_URL}/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+        const url = `${GEMINI_BASE_URL}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -127,12 +191,18 @@ Respond ONLY with valid JSON: {"classification": "EDUCATIONAL" or "NOT_EDUCATION
 
   // ─── Record user override ────────────────────────────────────────────────
   if (message.type === 'recordOverride') {
-    chrome.storage.local.get(['aiStats'], (result) => {
-      const aiStats = result.aiStats || { aiClassified: 0, blocked: 0, overridden: 0 };
-      aiStats.overridden++;
-      chrome.storage.local.set({ aiStats });
-    });
-    sendResponse({ success: true });
+    (async () => {
+      try {
+        await updateAiStats((aiStats) => {
+          aiStats.overridden++;
+          return aiStats;
+        });
+        sendResponse({ success: true });
+      } catch (error) {
+        console.error('MMP: Failed to record override:', error);
+        sendResponse({ success: false, error: error.message });
+      }
+    })();
     return true;
   }
 
