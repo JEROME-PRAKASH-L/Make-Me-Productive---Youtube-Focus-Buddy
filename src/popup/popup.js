@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const aiBlocked = document.getElementById('aiBlocked');
   const aiOverridden = document.getElementById('aiOverridden');
   const exportDataBtn = document.getElementById('exportDataBtn');
+  const geminiApiKeyInput = document.getElementById('geminiApiKey');
+  const saveGeminiApiKey = document.getElementById('saveGeminiApiKey');
+  const geminiApiKeyStatus = document.getElementById('geminiApiKeyStatus');
 
   const focusSessionCard = document.getElementById('focusSessionCard');
   const focusSessionStatus = document.getElementById('focusSessionStatus');
@@ -447,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const [syncState, localState, focusResponse] = await Promise.all([
         syncGet(['distractionFilterEnabled']),
-        localGet(['videoStats', 'lastStats', 'dailyGoal', 'aiStats']),
+        localGet(['videoStats', 'lastStats', 'dailyGoal', 'aiStats', 'geminiApiKey']),
         runtimeSendMessage({ type: 'getFocusSession' }).catch(() => ({ success: false, result: null })),
         minimumLoaderTime
       ]);
@@ -456,6 +459,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const dailyGoal = localState.dailyGoal || 30;
       updateGoalDisplay(dailyGoal, 0);
+
+      geminiApiKeyInput.value = localState.geminiApiKey || '';
+      if (localState.geminiApiKey) {
+        geminiApiKeyStatus.textContent = 'Key saved locally. AI classification is enabled.';
+      }
 
       if (localState.lastStats && Date.now() - localState.lastStats.timestamp < 3600000) {
         renderCachedStats(localState.lastStats);
@@ -477,10 +485,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  goalSlider.addEventListener('input', async () => {
+  goalSlider.addEventListener('input', () => {
     const value = parseInt(goalSlider.value, 10);
-    await localSet({ dailyGoal: value });
     updateGoalDisplay(value, parseInt(educationalTime.textContent, 10) || 0);
+  });
+
+  goalSlider.addEventListener('change', () => {
+    const value = parseInt(goalSlider.value, 10);
+    localSet({ dailyGoal: value }).catch((error) => {
+      console.error('MMP: Failed to save daily goal:', error);
+    });
+  });
+
+  saveGeminiApiKey.addEventListener('click', () => {
+    const geminiApiKey = geminiApiKeyInput.value.trim();
+    localSet({ geminiApiKey }).then(() => {
+      geminiApiKeyStatus.textContent = geminiApiKey
+        ? 'Key saved locally. AI classification is enabled.'
+        : 'Key cleared. Local classification will be used.';
+    }).catch((error) => {
+      console.error('MMP: Failed to save Gemini API key:', error);
+      geminiApiKeyStatus.textContent = 'Could not save the key. Please try again.';
+    });
   });
 
   toggle.addEventListener('change', () => {
