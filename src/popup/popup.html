@@ -84,6 +84,7 @@
         <span class="goal-title">Daily learning goal</span>
         <span id="goalValue" class="goal-value">30 min</span>
       </div>
+      <label for="goalSlider" class="sr-only">Daily learning goal in minutes</label>
       <input type="range" id="goalSlider" class="goal-slider" min="0" max="120" value="30" step="5" />
       <div id="goalProgressText" class="goal-progress-text">0% of goal</div>
     </div>
@@ -114,6 +115,7 @@
           <span>Custom duration</span>
           <span id="focusSessionCustomValue">25 min</span>
         </div>
+        <label for="focusSessionCustomSlider" class="sr-only">Custom focus session duration in minutes</label>
         <input
           type="range"
           id="focusSessionCustomSlider"
@@ -161,6 +163,27 @@
         <span class="ai-stat-label">Overridden</span>
         <span id="aiOverridden" class="ai-stat-value">0</span>
       </div>
+    </div>
+
+    <div class="api-key-settings">
+      <label for="geminiApiKey" class="api-key-label">
+        Gemini API key <span>(optional)</span>
+      </label>
+      <div class="api-key-row">
+        <input
+          type="password"
+          id="geminiApiKey"
+          class="api-key-input"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Paste your Gemini API key"
+          aria-describedby="geminiApiKeyStatus"
+        />
+        <button type="button" id="saveGeminiApiKey" class="api-key-save">Save</button>
+      </div>
+      <p id="geminiApiKeyStatus" class="api-key-status" role="status" aria-live="polite">
+        Stored only in Chrome local extension storage. Leave blank to use local classification.
+      </p>
     </div>
 
     <div class="divider"></div>
