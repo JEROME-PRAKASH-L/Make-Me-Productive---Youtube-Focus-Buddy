@@ -584,3 +584,82 @@ input:checked + .toggle-slider:before {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+
+/* ── API Key Settings ── */
+.api-key-settings {
+  margin: 0.85rem 1rem 0;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius);
+}
+
+.api-key-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #1e293b;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.api-key-label span {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.api-key-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.api-key-input {
+  min-width: 0;
+  flex: 1;
+  padding: 0.58rem 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.6rem;
+  color: #1e293b;
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.api-key-input:focus {
+  border-color: var(--teal);
+  outline: 2px solid rgba(13, 115, 119, 0.15);
+}
+
+.api-key-save {
+  border: 0;
+  border-radius: 0.6rem;
+  padding: 0.58rem 0.75rem;
+  background: var(--teal);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.api-key-save:hover {
+  background: var(--teal-dark);
+}
+
+.api-key-status {
+  margin: 0.45rem 0 0;
+  color: #64748b;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
