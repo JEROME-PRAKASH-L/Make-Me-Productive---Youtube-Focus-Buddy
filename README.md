@@ -45,10 +45,12 @@
 ## Installation
 
 1. Clone or download this repository to your local machine.
-2. Optional: add your own Gemini API key in `src/background/config.js` to enable AI transcript classification. Leave it blank to use the local keyword fallback only.
-3. Open Chrome and go to `chrome://extensions/`.
-4. Enable **Developer mode** in the top-right corner.
-5. Click **Load unpacked** and select the folder containing this project.
+2. Open Chrome and go to `chrome://extensions/`.
+3. Enable **Developer mode** in the top-right corner.
+4. Click **Load unpacked** and select the folder containing this project.
+5. Optional: open the extension popup, paste your Gemini API key into **Gemini API key**, and click **Save**. Leave it blank to use local keyword classification only.
+
+The key is stored in Chrome's local extension storage. It is never placed in the extension source or committed to the repository.
 
 ## Usage
 
@@ -154,7 +156,7 @@ Planned improvements and near-term work:
 
 - Keyword-based classification runs entirely in the browser.
 - AI classification sends only video transcripts to Google Gemini API — no personal data.
-- Uses Chrome Storage for local settings and stats only.
+- Uses Chrome Storage for local settings, stats, and the optional Gemini API key.
 - No tracking, no analytics, no third-party services beyond Gemini.
 
 ## Troubleshooting
