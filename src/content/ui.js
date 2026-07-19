@@ -98,10 +98,10 @@ function createBlackOverlay(reason, confidence) {
       </div>
       <h2 style="color:white;font-size:1.5rem;font-weight:700;margin:0 0 0.75rem;">Non-Educational Content Detected</h2>
       <p style="color:#9ca3af;font-size:0.95rem;margin:0 0 0.5rem;line-height:1.5;">
-        ${reason || 'This video was classified as non-educational content.'}
+        <span id="mmp-block-reason"></span>
       </p>
       <p style="color:#6b7280;font-size:0.8rem;margin:0 0 2rem;">
-        Confidence: ${confidencePct}%
+        Confidence: <span id="mmp-block-confidence"></span>
       </p>
       <div style="display:flex;gap:12px;justify-content:center;">
         <button id="mmp-go-back" style="
@@ -123,6 +123,10 @@ function createBlackOverlay(reason, confidence) {
       </div>
     </div>
   `;
+
+  overlay.querySelector('#mmp-block-reason').textContent =
+    reason || 'This video was classified as non-educational content.';
+  overlay.querySelector('#mmp-block-confidence').textContent = `${confidencePct}%`;
 
   document.body.appendChild(overlay);
   watchPageOverlay = overlay;
