@@ -458,7 +458,6 @@ const distractingKeywordMessages = {
   wrestling: "Wrestle with challenging problems instead.",
   boxing: "Fight for your future — hit the books!",
   news: "Headlines fade. Skills compound forever.",
-  gossip: "Skip the drama. Build your empire.",
   tiktok: "Scroll less. Learn more.",
   cringe: "The only cringe is not investing in yourself.",
   roast: "Roast procrastination, not people.",
