@@ -1,0 +1,42 @@
+name: Greetings
+
+on: [pull_request_target, issues]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Greet first-time contributors
+        if: github.actor != github.repository_owner
+        uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+          issue-message: |
+            👋 Hey there! Welcome to our community — we're really glad you're here.
+
+            Opening your first issue is a powerful step. It means you're not just using the product — you're helping improve it for everyone. 🚀
+
+            This project is all about helping people stay focused, learn better, and become more productive. By contributing, you're directly helping others build better habits too.
+
+            ✨ Every small contribution matters  
+            📈 Track your growth, celebrate your milestones, and keep showing up  
+
+            Keep going — you're doing meaningful work. 💙
+
+          pr-message: |
+            🎉 Welcome, and congratulations on your first contribution!
+
+            This is more than just a pull request — it's a step toward building something that helps people stay focused, learn, and grow every day.
+
+            By contributing here, you're not only improving the product — you're helping others become more productive and intentional with their time. That’s real impact. 💡
+
+            🌱 Keep building  
+            🧠 Keep learning  
+            📊 Share your milestones and be proud of your progress  
+
+            Open source grows because of people like you. Keep contributing — you're doing amazing work! 🚀
